@@ -1,0 +1,85 @@
+{
+  "$schema": "https://raw.githubusercontent.com/christian140903-sudo/proofspec/main/proofspec.schema.json",
+  "schemaVersion": 1,
+  "project": {
+    "name": "Proofspec",
+    "repository": "https://github.com/christian140903-sudo/proofspec",
+    "homepage": "https://nextool.app/proofspec/"
+  },
+  "defaults": {
+    "ledgerPath": ".proofspec/ledger.db",
+    "reportDir": ".proofspec/reports"
+  },
+  "claims": [
+    {
+      "id": "package-identity",
+      "statement": "The package is named proofspec and declares version 0.1.0.",
+      "severity": "error",
+      "policy": { "mode": "all" },
+      "evidence": [
+        {
+          "id": "name",
+          "verifier": { "kind": "file", "path": "package.json", "check": { "op": "json_equals", "pointer": "/name", "value": "proofspec" } }
+        },
+        {
+          "id": "version",
+          "verifier": { "kind": "file", "path": "package.json", "check": { "op": "json_equals", "pointer": "/version", "value": "0.1.0" } }
+        }
+      ],
+      "limitations": ["Local package metadata does not prove registry publication."],
+      "tags": ["package", "release"]
+    },
+    {
+      "id": "documented-surfaces",
+      "statement": "The README documents the CLI, TypeScript API, MCP server, reports, and CI integration.",
+      "severity": "error",
+      "policy": { "mode": "all" },
+      "evidence": [
+        { "id": "cli", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## Quick start" } } },
+        { "id": "sdk", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## TypeScript API" } } },
+        { "id": "mcp", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## MCP server" } } },
+        { "id": "reports", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## Reports" } } },
+        { "id": "ci", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## CI" } } }
+      ],
+      "limitations": ["Section presence does not establish documentation completeness."],
+      "tags": ["documentation"]
+    },
+    {
+      "id": "bounded-verifiers",
+      "statement": "Proofspec documents a constrained verifier surface without arbitrary shell execution.",
+      "severity": "error",
+      "policy": { "mode": "all" },
+      "dependsOn": ["documented-surfaces"],
+      "evidence": [
+        { "id": "security-boundary", "verifier": { "kind": "file", "path": "docs/SECURITY-MODEL.md", "check": { "op": "contains", "text": "Running user-provided shell commands." } } },
+        { "id": "readme-boundary", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "There is intentionally no arbitrary shell verifier" } } }
+      ],
+      "limitations": ["Documentation is paired with tests and source review; this check alone does not prove absence of every implementation bug."],
+      "tags": ["security"]
+    },
+    {
+      "id": "example-available",
+      "statement": "The repository contains a complete schema-version-1 example specification.",
+      "severity": "error",
+      "policy": { "mode": "all" },
+      "dependsOn": ["package-identity"],
+      "evidence": [
+        { "id": "example", "verifier": { "kind": "file", "path": "examples/proofspec.json", "check": { "op": "exists" } } },
+        { "id": "schema-version", "verifier": { "kind": "file", "path": "examples/proofspec.json", "check": { "op": "json_equals", "pointer": "/schemaVersion", "value": 1 } } }
+      ],
+      "limitations": ["Repository CI separately executes the bundled example."],
+      "tags": ["example"]
+    },
+    {
+      "id": "usefulness-reviewed",
+      "statement": "A human has reviewed Proofspec's broader usefulness for public software claims.",
+      "severity": "info",
+      "policy": { "mode": "all" },
+      "evidence": [
+        { "id": "human-review", "verifier": { "kind": "manual", "instructions": "Review the product boundary, examples, and reports with representative users." } }
+      ],
+      "limitations": ["Subjective usefulness is not converted into automated proof."],
+      "tags": ["human-review"]
+    }
+  ]
+}

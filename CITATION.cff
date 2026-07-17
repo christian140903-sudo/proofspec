@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If Proofspec helps your research or software-evidence workflow, cite this project."
+title: "Proofspec: Executable Evidence Contracts for Public Software Claims"
+type: software
+authors:
+  - family-names: Bucher
+    given-names: Christian
+version: 0.1.0
+date-released: 2026-07-17
+url: "https://github.com/christian140903-sudo/proofspec"
+repository-code: "https://github.com/christian140903-sudo/proofspec"
+license: MIT

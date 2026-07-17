@@ -1,0 +1,82 @@
+{
+  "$schema": "https://raw.githubusercontent.com/christian140903-sudo/proofspec/main/proofspec.schema.json",
+  "schemaVersion": 1,
+  "project": {
+    "name": "Proofspec example",
+    "repository": "https://github.com/christian140903-sudo/proofspec"
+  },
+  "defaults": {
+    "ledgerPath": ".proofspec/ledger.db",
+    "reportDir": ".proofspec"
+  },
+  "claims": [
+    {
+      "id": "documented",
+      "statement": "The sample project explains its purpose in a README.",
+      "severity": "error",
+      "policy": { "mode": "all" },
+      "evidence": [
+        {
+          "id": "readme-exists",
+          "verifier": { "kind": "file", "path": "sample-project/README.md", "check": { "op": "exists" } }
+        },
+        {
+          "id": "purpose-text",
+          "verifier": { "kind": "file", "path": "sample-project/README.md", "check": { "op": "contains", "text": "executable evidence contracts" } }
+        }
+      ],
+      "limitations": ["Text presence does not establish documentation quality."],
+      "tags": ["documentation"]
+    },
+    {
+      "id": "package-identity",
+      "statement": "The sample package is named proofspec-example and declares version 1.0.0.",
+      "severity": "error",
+      "policy": { "mode": "all" },
+      "evidence": [
+        {
+          "id": "name",
+          "verifier": { "kind": "file", "path": "sample-project/package.json", "check": { "op": "json_equals", "pointer": "/name", "value": "proofspec-example" } }
+        },
+        {
+          "id": "version",
+          "verifier": { "kind": "file", "path": "sample-project/package.json", "check": { "op": "json_equals", "pointer": "/version", "value": "1.0.0" } }
+        }
+      ],
+      "tags": ["package"]
+    },
+    {
+      "id": "release-manifest",
+      "statement": "The release manifest records version 1.0.0 and twelve passing checks.",
+      "severity": "error",
+      "policy": { "mode": "at_least", "count": 2 },
+      "dependsOn": ["package-identity"],
+      "evidence": [
+        {
+          "id": "release-version",
+          "verifier": { "kind": "file", "path": "sample-project/release.json", "check": { "op": "json_equals", "pointer": "/version", "value": "1.0.0" } }
+        },
+        {
+          "id": "test-count",
+          "verifier": { "kind": "file", "path": "sample-project/release.json", "check": { "op": "json_equals", "pointer": "/tests/passed", "value": 12 } }
+        }
+      ],
+      "limitations": ["A manifest records a value; it does not independently replay the tests."],
+      "tags": ["release", "tests"]
+    },
+    {
+      "id": "human-review",
+      "statement": "A human has reviewed the example's broader usefulness.",
+      "severity": "info",
+      "policy": { "mode": "all" },
+      "evidence": [
+        {
+          "id": "review",
+          "verifier": { "kind": "manual", "instructions": "Review the example and record the decision outside this automated gate." }
+        }
+      ],
+      "limitations": ["Manual checks remain unknown until separately attested; they are not external proof."],
+      "tags": ["human-review"]
+    }
+  ]
+}

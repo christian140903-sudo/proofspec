@@ -1,0 +1,79 @@
+{
+  "name": "proofspec",
+  "version": "0.1.0",
+  "description": "Executable evidence contracts for public software claims — CLI, TypeScript SDK, CI gate, and MCP server.",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "bin": {
+    "proofspec": "dist/src/index.js",
+    "proofspec-mcp": "dist/src/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/src/index.js serve",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "test:coverage": "npm run build && node --experimental-test-coverage --test dist/test/*.test.js",
+    "prepack": "npm run build",
+    "smoke:pack": "node scripts/release-smoke.mjs",
+    "prepublishOnly": "npm run test && npm run smoke:pack"
+  },
+  "keywords": [
+    "ai-agents",
+    "claims",
+    "ci",
+    "evidence",
+    "mcp",
+    "model-context-protocol",
+    "postcondition",
+    "provenance",
+    "readme",
+    "software-verification"
+  ],
+  "author": "Christian Bucher",
+  "contributors": [
+    "AI-assisted development under human direction and review"
+  ],
+  "license": "MIT",
+  "files": [
+    "dist/src",
+    "docs",
+    "examples",
+    "proofspec.schema.json",
+    "server.json",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christian140903-sudo/proofspec.git"
+  },
+  "bugs": {
+    "url": "https://github.com/christian140903-sudo/proofspec/issues"
+  },
+  "homepage": "https://nextool.app/proofspec/",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "postcondition-mcp": "^0.1.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  },
+  "mcpName": "io.github.christian140903-sudo/proofspec"
+}

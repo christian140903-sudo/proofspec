@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/christian140903-sudo/proofspec/main/proofspec.schema.json",
+  "title": "Proofspec",
+  "description": "Executable evidence contracts for public software claims.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "project", "claims"],
+  "properties": {
+    "$schema": { "type": "string", "format": "uri" },
+    "schemaVersion": { "const": 1 },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "repository": { "type": "string", "format": "uri" },
+        "homepage": { "type": "string", "format": "uri" }
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ledgerPath": { "type": "string", "minLength": 1, "maxLength": 16000 },
+        "reportDir": { "type": "string", "minLength": 1, "maxLength": 16000 }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": { "$ref": "#/$defs/claim" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{0,63}$" },
+    "jsonValue": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" },
+        { "type": "array", "items": { "$ref": "#/$defs/jsonValue" } },
+        { "type": "object", "additionalProperties": { "$ref": "#/$defs/jsonValue" } }
+      ]
+    },
+    "policy": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": { "mode": { "const": "all" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": { "mode": { "const": "any" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "count"],
+          "properties": {
+            "mode": { "const": "at_least" },
+            "count": { "type": "integer", "minimum": 1, "maximum": 50 }
+          }
+        }
+      ]
+    },
+    "fileVerifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "check"],
+      "properties": {
+        "kind": { "const": "file" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 16000 },
+        "check": {
+          "oneOf": [
+            { "type": "object", "additionalProperties": false, "required": ["op"], "properties": { "op": { "const": "exists" } } },
+            { "type": "object", "additionalProperties": false, "required": ["op"], "properties": { "op": { "const": "not_exists" } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "equals"], "properties": { "op": { "const": "sha256" }, "equals": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "text"], "properties": { "op": { "const": "contains" }, "text": { "type": "string", "minLength": 1, "maxLength": 100000 } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "pointer", "value"], "properties": { "op": { "const": "json_equals" }, "pointer": { "type": "string", "maxLength": 2000 }, "value": { "$ref": "#/$defs/jsonValue" } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "bytes"], "properties": { "op": { "const": "min_size" }, "bytes": { "type": "integer", "minimum": 0 } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "bytes"], "properties": { "op": { "const": "max_size" }, "bytes": { "type": "integer", "minimum": 0 } } }
+          ]
+        }
+      }
+    },
+    "httpVerifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "url", "check"],
+      "properties": {
+        "kind": { "const": "http" },
+        "url": { "type": "string", "format": "uri", "maxLength": 16000 },
+        "timeoutMs": { "type": "integer", "minimum": 100, "maximum": 30000 },
+        "check": {
+          "oneOf": [
+            { "type": "object", "additionalProperties": false, "required": ["op", "equals"], "properties": { "op": { "const": "status" }, "equals": { "type": "integer", "minimum": 100, "maximum": 599 } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "text"], "properties": { "op": { "const": "contains" }, "text": { "type": "string", "minLength": 1, "maxLength": 100000 } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "pointer", "value"], "properties": { "op": { "const": "json_equals" }, "pointer": { "type": "string", "maxLength": 2000 }, "value": { "$ref": "#/$defs/jsonValue" } } }
+          ]
+        }
+      }
+    },
+    "gitVerifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "cwd", "check"],
+      "properties": {
+        "kind": { "const": "git" },
+        "cwd": { "type": "string", "minLength": 1, "maxLength": 16000 },
+        "check": {
+          "oneOf": [
+            { "type": "object", "additionalProperties": false, "required": ["op", "equals"], "properties": { "op": { "const": "branch" }, "equals": { "type": "string", "minLength": 1, "maxLength": 500 } } },
+            { "type": "object", "additionalProperties": false, "required": ["op"], "properties": { "op": { "const": "clean" }, "equals": { "type": "boolean" } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "equals"], "properties": { "op": { "const": "head" }, "equals": { "type": "string", "minLength": 1, "maxLength": 500 } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "tag"], "properties": { "op": { "const": "tag_exists" }, "tag": { "type": "string", "minLength": 1, "maxLength": 500 } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "commit"], "properties": { "op": { "const": "remote_contains" }, "commit": { "type": "string", "minLength": 1, "maxLength": 500 }, "remote": { "type": "string", "pattern": "^[A-Za-z0-9._-]+$" } } }
+          ]
+        }
+      }
+    },
+    "npmVerifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "package", "check"],
+      "properties": {
+        "kind": { "const": "npm" },
+        "package": { "type": "string", "pattern": "^(?:@[a-zA-Z0-9][a-zA-Z0-9._~-]*/[a-zA-Z0-9][a-zA-Z0-9._~-]*|[a-zA-Z0-9][a-zA-Z0-9._~-]*)$" },
+        "registry": { "type": "string", "format": "uri", "maxLength": 16000 },
+        "check": {
+          "oneOf": [
+            { "type": "object", "additionalProperties": false, "required": ["op", "version"], "properties": { "op": { "const": "version_exists" }, "version": { "type": "string", "minLength": 1, "maxLength": 256 } } },
+            { "type": "object", "additionalProperties": false, "required": ["op", "tag", "equals"], "properties": { "op": { "const": "dist_tag" }, "tag": { "type": "string", "minLength": 1, "maxLength": 256 }, "equals": { "type": "string", "minLength": 1, "maxLength": 256 } } }
+          ]
+        }
+      }
+    },
+    "manualVerifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "instructions"],
+      "properties": {
+        "kind": { "const": "manual" },
+        "instructions": { "type": "string", "minLength": 1, "maxLength": 20000 }
+      }
+    },
+    "verifier": {
+      "oneOf": [
+        { "$ref": "#/$defs/fileVerifier" },
+        { "$ref": "#/$defs/httpVerifier" },
+        { "$ref": "#/$defs/gitVerifier" },
+        { "$ref": "#/$defs/npmVerifier" },
+        { "$ref": "#/$defs/manualVerifier" }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "verifier"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "description": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "verifier": { "$ref": "#/$defs/verifier" }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "statement": { "type": "string", "minLength": 5, "maxLength": 20000 },
+        "severity": { "enum": ["error", "warning", "info"] },
+        "policy": { "$ref": "#/$defs/policy" },
+        "evidence": { "type": "array", "maxItems": 50, "items": { "$ref": "#/$defs/evidence" } },
+        "dependsOn": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/id" } },
+        "limitations": { "type": "array", "maxItems": 100, "items": { "type": "string", "minLength": 1, "maxLength": 4000 } },
+        "tags": { "type": "array", "maxItems": 100, "items": { "type": "string", "minLength": 1, "maxLength": 100 } }
+      }
+    }
+  }
+}
