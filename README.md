@@ -54,7 +54,11 @@ Useful examples:
 
 Requires Node.js 20 or newer.
 
+The v0.1.0 source release is available now. Until the npm registry publication
+is visible, install the smoke-tested release artifact directly from GitHub:
+
 ```bash
+npm install --save-dev https://github.com/christian140903-sudo/proofspec/releases/download/v0.1.0/proofspec-0.1.0.tgz
 npx proofspec init
 npx proofspec check
 ```
@@ -162,12 +166,14 @@ and unknown.
 
 ## MCP server
 
+From a clone, build once and point the MCP client at the absolute entry path:
+
 ```json
 {
   "mcpServers": {
     "proofspec": {
-      "command": "npx",
-      "args": ["-y", "proofspec", "serve"],
+      "command": "node",
+      "args": ["/absolute/path/to/proofspec/dist/src/index.js", "serve"],
       "env": { "PROOFSPEC_CONFIG": "/absolute/path/to/proofspec.json" }
     }
   }
@@ -196,7 +202,7 @@ console.log(renderReport(report, 'markdown'));
 ## CI
 
 ```yaml
-- run: npm install --no-save proofspec
+- run: npm install --no-save https://github.com/christian140903-sudo/proofspec/releases/download/v0.1.0/proofspec-0.1.0.tgz
 - run: npx proofspec check proofspec.json
 ```
 
