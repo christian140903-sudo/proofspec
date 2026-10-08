@@ -58,6 +58,19 @@
       "tags": ["security"]
     },
     {
+      "id": "install-path-guarded",
+      "statement": "The README warns that the npm package named proofspec is unrelated and runs the local binary only with --no-install.",
+      "severity": "error",
+      "policy": { "mode": "all" },
+      "dependsOn": ["documented-surfaces"],
+      "evidence": [
+        { "id": "foreign-name-warning", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "The npm package named `proofspec` is not this project." } } },
+        { "id": "guarded-ci-command", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "npx --no-install proofspec check proofspec.json" } } }
+      ],
+      "limitations": ["Text presence does not prove that no other example uses plain npx; test/install-docs.test.ts scans every Markdown code block and server.json for that."],
+      "tags": ["documentation", "supply-chain"]
+    },
+    {
       "id": "example-available",
       "statement": "The repository contains a complete schema-version-1 example specification.",
       "severity": "error",
