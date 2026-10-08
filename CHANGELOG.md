@@ -10,8 +10,11 @@ All notable changes to Proofspec are documented here.
   install fails instead of fetching that package.
 - `server.json` no longer lists the npm identifier `proofspec`; this project
   has no npm release.
-- A test scans every Markdown code block and `server.json` for plain
-  `npx proofspec` invocations.
+- A test scans every fenced Markdown code block (also indented and `~~~`
+  fences) for `npx proofspec` invocations that neither use `--no-install` nor
+  name this project's GitHub release artifact, fails on MCP configuration
+  blocks that are not valid JSON, and checks that `server.json` lists no npm
+  package `proofspec`.
 
 ## 0.1.0 — 2026-07-17
 

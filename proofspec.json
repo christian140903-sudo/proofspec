@@ -67,7 +67,7 @@
         { "id": "foreign-name-warning", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "The npm package named `proofspec` is not this project." } } },
         { "id": "guarded-ci-command", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "npx --no-install proofspec check proofspec.json" } } }
       ],
-      "limitations": ["Text presence does not prove that no other example uses plain npx; test/install-docs.test.ts scans every Markdown code block and server.json for that."],
+      "limitations": ["Text presence does not prove that no other example uses plain npx; test/install-docs.test.ts scans every fenced Markdown code block and server.json for that."],
       "tags": ["documentation", "supply-chain"]
     },
     {
