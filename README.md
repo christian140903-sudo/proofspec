@@ -54,13 +54,29 @@ Useful examples:
 
 Requires Node.js 20 or newer.
 
-The v0.1.0 source release is available now. Until the npm registry publication
-is visible, install the smoke-tested release artifact directly from GitHub:
+> [!WARNING]
+> **The npm package named `proofspec` is not this project.** That name on the
+> public npm registry belongs to an unrelated author and ships its own
+> `proofspec` executable. This project is not published on npm. Install it only
+> from this repository or its GitHub release, and do not run plain
+> `npx proofspec`: when no local install is present, npx downloads and runs
+> that other package, and in CI it does so without asking.
+
+Install the v0.1.0 release artifact from GitHub, then call the local binary
+with `--no-install`, which stops with an error instead of downloading anything
+if the local install is missing:
 
 ```bash
 npm install --save-dev https://github.com/christian140903-sudo/proofspec/releases/download/v0.1.0/proofspec-0.1.0.tgz
-npx proofspec init
-npx proofspec check
+npx --no-install proofspec init
+npx --no-install proofspec check
+```
+
+To try the CLI once without adding a dependency, name the release artifact
+explicitly:
+
+```bash
+npx --package=https://github.com/christian140903-sudo/proofspec/releases/download/v0.1.0/proofspec-0.1.0.tgz -- proofspec --help
 ```
 
 Or run the included example from a clone:
@@ -180,6 +196,27 @@ From a clone, build once and point the MCP client at the absolute entry path:
 }
 ```
 
+Without a clone, point npx at the release artifact. Do not use
+`npx -y proofspec serve`; that starts the unrelated npm package.
+
+```json
+{
+  "mcpServers": {
+    "proofspec": {
+      "command": "npx",
+      "args": [
+        "--yes",
+        "--package=https://github.com/christian140903-sudo/proofspec/releases/download/v0.1.0/proofspec-0.1.0.tgz",
+        "--",
+        "proofspec",
+        "serve"
+      ],
+      "env": { "PROOFSPEC_CONFIG": "/absolute/path/to/proofspec.json" }
+    }
+  }
+}
+```
+
 The stdio server exposes:
 
 - `proofspec_validate`
@@ -190,6 +227,9 @@ The stdio server exposes:
 - prompt `audit-public-claims`
 
 ## TypeScript API
+
+After installing the release artifact as shown in the quick start (not
+`npm install proofspec`, which fetches the unrelated registry package):
 
 ```ts
 import { runProofspec, renderReport } from 'proofspec';
@@ -203,8 +243,12 @@ console.log(renderReport(report, 'markdown'));
 
 ```yaml
 - run: npm install --no-save https://github.com/christian140903-sudo/proofspec/releases/download/v0.1.0/proofspec-0.1.0.tgz
-- run: npx proofspec check proofspec.json
+- run: npx --no-install proofspec check proofspec.json
 ```
+
+Keep `--no-install` in CI. npm answers its own install prompt with "yes" when
+it detects CI or a non-interactive shell, so if the install step failed, plain
+`npx proofspec` would fetch and run the unrelated `proofspec` package instead.
 
 Commit the specification, not the generated `.proofspec/` ledger. Upload the
 reports as build artifacts if reviewers need them.
