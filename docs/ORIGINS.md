@@ -7,9 +7,9 @@ messages could become more polished than the evidence behind them.
 The precursor was an evidence-extraction protocol and public claim-boundary
 matrix used to rebuild a large technical portfolio. That workflow required
 every strong sentence to point to a source location, observable artifact, test,
-or explicit limitation. The ANIMA public audit then exposed the same problem in
-product form: a high test count could be real while a consciousness claim built
-around it remained unsupported.
+or explicit limitation. A public audit of one of his earlier side projects then
+exposed the same problem in product form: a high test count could be real while
+the headline claim built around it remained unsupported.
 
 Postcondition supplied the missing runtime primitive: a constrained verifier
 and a hash-chained receipt for observable world state. Proofspec applies that
