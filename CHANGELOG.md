@@ -15,6 +15,11 @@ All notable changes to Proofspec are documented here.
   name this project's GitHub release artifact, fails on MCP configuration
   blocks that are not valid JSON, and checks that `server.json` lists no npm
   package `proofspec`.
+- Raise the `@modelcontextprotocol/sdk` floor to `^1.32.1` and refresh the
+  lockfile. `npm audit` on a fresh clone goes from 7 findings (1 critical,
+  3 high, 3 moderate; the SDK 1.29.0 itself and packages it pulls in) to 0.
+  Installs from the v0.1.0 release tarball already resolve SDK 1.32.1, since
+  the tarball carries no lockfile.
 
 ## 0.1.0 — 2026-07-17
 
