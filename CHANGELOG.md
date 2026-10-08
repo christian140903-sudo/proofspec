@@ -20,6 +20,13 @@ All notable changes to Proofspec are documented here.
   3 high, 3 moderate; the SDK 1.29.0 itself and packages it pulls in) to 0.
   Installs from the v0.1.0 release tarball already resolve SDK 1.32.1, since
   the tarball carries no lockfile.
+- Documentation: the README follows the shared project structure (try it,
+  why it exists, verify it yourself with the expected test count and date,
+  what it does not do, how this was built, status). It documents two 0.1.0
+  rough edges: `check --strict` prints the default gate's summary line while
+  the exit code follows the strict gate, and `--no-write` still appends
+  receipts to the local ledger. The self-spec checks the renamed
+  "Try it in two minutes" section.
 
 ## 0.1.0 — 2026-07-17
 

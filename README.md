@@ -2,15 +2,20 @@
 
 **Claims are cheap. Proofspec makes them executable.**
 
-Proofspec turns the important statements in a README, release, product page, or
-agent completion message into versioned evidence contracts. It checks those
-contracts with constrained verifiers, preserves hash-chained receipts, models
-dependencies between claims, and fails CI when required claims are not actually
-verified.
-
 [![CI](https://github.com/christian140903-sudo/proofspec/actions/workflows/ci.yml/badge.svg)](https://github.com/christian140903-sudo/proofspec/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/christian140903-sudo/proofspec?display_name=tag)](https://github.com/christian140903-sudo/proofspec/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-53e6a7.svg)](LICENSE)
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-53e6a7.svg)](package.json)
+
+A README, release note, product page, or agent completion message can say more
+than the evidence behind it. Proofspec turns the important statements in those
+texts into versioned evidence contracts. It checks those contracts with
+constrained verifiers, preserves hash-chained receipts, models dependencies
+between claims, and fails CI when required claims are not actually verified.
+
+It is for maintainers who publish claims about their software and for agent
+setups that should check a claim before reporting it. It is not a test runner,
+not a link crawler, and not a fact-checker for prose.
 
 ```text
 README / release / product claim
@@ -32,25 +37,7 @@ Proofspec does not declare broad truth. A satisfied verifier proves only the
 observation you configured. Unknown stays unknown; manual stays manual; a
 dependency that is not verified blocks the claims built on top of it.
 
-## Why this exists
-
-README linters check structure. Link checkers check URLs. Transcript auditors
-compare an agent's words with a repository after the fact. Proofspec occupies a
-different layer: the project author defines the evidence contract that must
-travel with a public claim, and the same contract runs locally, in CI, through
-TypeScript, or as an MCP tool.
-
-Useful examples:
-
-- “Version `1.4.0` is public on npm” → registry version check.
-- “The release page is live” → public HTTP status/content checks.
-- “This artifact contains 358 passing tests” → bounded JSON evidence plus an
-  explicit limitation that the manifest does not replay the tests.
-- “The published commit is tagged” → Git tag and remote-containment checks.
-- “A human approved the usability” → manual evidence that remains `unknown`,
-  never silently upgraded to external proof.
-
-## Quick start
+## Try it in two minutes
 
 Requires Node.js 20 or newer.
 
@@ -62,14 +49,27 @@ Requires Node.js 20 or newer.
 > `npx proofspec`: when no local install is present, npx downloads and runs
 > that other package, and in CI it does so without asking.
 
-Install the v0.1.0 release artifact from GitHub, then call the local binary
-with `--no-install`, which stops with an error instead of downloading anything
-if the local install is missing:
+Install the v0.1.0 release artifact from GitHub into a project, then call the
+local binary with `--no-install`, which stops with an error instead of
+downloading anything if the local install is missing:
 
 ```bash
 npm install --save-dev https://github.com/christian140903-sudo/proofspec/releases/download/v0.1.0/proofspec-0.1.0.tgz
-npx --no-install proofspec init
-npx --no-install proofspec check
+npx --no-install proofspec init     # writes proofspec.json with one claim: README.md exists
+npx --no-install proofspec check    # exit 0: gate passed · exit 1: a required claim is not verified
+```
+
+In a project without a `README.md`, the first `check` prints
+`Proofspec FAIL — my-project` and `0/1 verified · 1 failed` and exits with 1:
+the starter claim is not true yet. Add a `README.md` and run `check` again to
+see it pass. The reports (JSON, Markdown, HTML, Mermaid, SARIF) and the receipt
+ledger land in `.proofspec/`.
+
+In Claude Code, add the MCP server from the same release artifact. It reads
+`proofspec.json` from the project directory:
+
+```bash
+claude mcp add proofspec -- npx --yes --package=https://github.com/christian140903-sudo/proofspec/releases/download/v0.1.0/proofspec-0.1.0.tgz -- proofspec serve
 ```
 
 To try the CLI once without adding a dependency, name the release artifact
@@ -79,17 +79,36 @@ explicitly:
 npx --package=https://github.com/christian140903-sudo/proofspec/releases/download/v0.1.0/proofspec-0.1.0.tgz -- proofspec --help
 ```
 
-Or run the included example from a clone:
+Last tried on 2026-10-08 in an empty project with an empty npm cache (Node 22,
+Linux): install, `init` and the first `check` took 8 seconds including the
+download. `claude mcp list` showed the server as connected; a separate MCP
+client calling `proofspec_check` through the same command found the project's
+`proofspec.json`.
 
-```bash
-npm install
-npm test
-node dist/src/index.js check examples/proofspec.json
-```
+## Why it exists
 
-The example verifies three required claims, reports one honest informational
-unknown, writes five report formats, and still passes the default gate. Add
-`--strict` to require warning and info claims too.
+README linters check structure. Link checkers check URLs. Transcript auditors
+compare an agent's words with a repository after the fact. Proofspec occupies a
+different layer: the project author defines the evidence contract that must
+travel with a public claim, and the same contract runs locally, in CI, through
+TypeScript, or as an MCP tool.
+
+A fair comparison: [markdown-link-check](https://www.npmjs.com/package/markdown-link-check)
+checks every link in a Markdown file and tells you which ones are dead, without
+any specification. Proofspec checks only what you configure. In exchange, a
+claim can require that one specific page answers with status 200 *and*
+contains the version the sentence next to the link names; if that claim has
+severity `error`, the build fails when either stops being true.
+
+Useful examples:
+
+- “Version `1.4.0` is public on npm” → registry version check.
+- “The release page is live” → public HTTP status/content checks.
+- “This artifact contains 358 passing tests” → bounded JSON evidence plus an
+  explicit limitation that the manifest does not replay the tests.
+- “The published commit is tagged” → Git tag and remote-containment checks.
+- “A human approved the usability” → manual evidence that remains `unknown`,
+  never silently upgraded to external proof.
 
 ## A specification
 
@@ -228,7 +247,7 @@ The stdio server exposes:
 
 ## TypeScript API
 
-After installing the release artifact as shown in the quick start (not
+After installing the release artifact as shown in [Try it in two minutes](#try-it-in-two-minutes) (not
 `npm install proofspec`, which fetches the unrelated registry package):
 
 ```ts
@@ -253,26 +272,104 @@ it detects CI or a non-interactive shell, so if the install step failed, plain
 Commit the specification, not the generated `.proofspec/` ledger. Upload the
 reports as build artifacts if reviewers need them.
 
-## Trust boundary
+## Verify it yourself
 
-Proofspec is a claim-evidence system, not a certification authority. A local
-hash chain detects receipt modification but is not an externally signed
-transparency log. Evidence can be precise while the prose around it is still
-misleading, which is why limitations are first-class fields and human review
-still matters.
+```bash
+git clone https://github.com/christian140903-sudo/proofspec && cd proofspec
+npm ci && npm test        # expected: 74 passing (last verified 2026-10-08, Node 22, fresh clone)
+```
+
+The tests cover the configuration schema and its validator (duplicate IDs,
+unknown dependencies, cycles, impossible thresholds), the three evidence
+policies and dependency blocking, the default and strict gates, all five report
+formats including HTML escaping, the receipt ledger and path redaction, the CLI
+and its exit codes, one real MCP exchange over stdio, the bundled example, and a
+guard that fails if any Markdown example runs plain `npx proofspec`. CI runs
+them on Node 20, 22 and 24.
+
+What they do not cover: no test contacts a real website or the npm registry
+(HTTP and npm checks are schema-validated here; their network behaviour is
+tested in [postcondition-mcp](https://github.com/christian140903-sudo/postcondition-mcp)),
+CI runs on Linux only, and the summary line that `check --strict` prints is not
+asserted (see below).
+
+The repository checks its own README, docs, package metadata and example with
+Proofspec; CI runs this after the tests:
+
+```bash
+node dist/src/index.js check proofspec.json --no-write
+# expected: Proofspec PASS — Proofspec
+#           5/6 verified · 0 failed · 1 unknown · 0 unsupported · 0 blocked
+```
+
+The one unknown is the manual claim that a human has reviewed Proofspec's
+broader usefulness. It stays unknown on purpose.
+
+Further checks, after `npm test` has built `dist/`:
+
+```bash
+node dist/src/index.js check examples/proofspec.json   # the bundled example
+npm run test:coverage                                   # coverage report
+npm run smoke:pack                                      # packs the tarball, installs it in a scratch project, runs the CLI, imports the SDK
+```
+
+The example verifies three required claims, reports one honest informational
+unknown, writes five report formats, and still passes the default gate. Add
+`--strict` to require warning and info claims too.
+
+## What it does not do
+
+- **It does not run your tests or any other command.** There is no shell
+  verifier. A claim such as “all tests pass” needs a machine-readable artifact
+  or a published result, and a manifest records a value; it does not replay
+  the tests.
+- **It does not judge prose.** A satisfied verifier proves only the configured
+  observation. Evidence can be precise while the sentence around it is still
+  misleading, which is why limitations are first-class fields and human review
+  still matters.
+- **It does not turn manual review into proof.** Manual evidence stays
+  `unknown` until it is attested separately.
+- **It does not provide non-repudiation.** Proofspec is a claim-evidence
+  system, not a certification authority. The local hash chain detects receipt
+  modification but is not an externally signed transparency log.
+- **It observes one moment.** HTTP and npm checks see public remote state when
+  they run; file and Git checks see the local machine.
+- **It is not on npm.** The unscoped npm name belongs to an unrelated project
+  (see the warning above).
+- **Two rough edges in 0.1.0.** With `--strict`, the exit code follows the
+  strict gate, but the summary line still reports the default gate, so it can
+  print `PASS` and exit with 1; scripts should read the exit code. `--no-write`
+  skips the report files but still appends receipts to the local ledger.
 
 Read the full [security model](docs/SECURITY-MODEL.md),
 [limitations](docs/LIMITATIONS.md), [configuration reference](docs/CONFIG.md),
 and [project origin](docs/ORIGINS.md).
 
-## Development
+## How this was built
 
-```bash
-npm install
-npm test
-npm run test:coverage
-npm run smoke:pack
-```
+Most of the code was written by AI coding agents under my direction. I wrote the
+specification, set the constraints, decided what to test, reviewed the result
+and rejected what did not hold. Release decisions and every claim in this README
+are mine.
 
-MIT licensed. Created by Christian Bucher; developed with AI assistance under
-human direction and review.
+The public history starts at the finished 0.1.0 code (two commits on
+2026-07-17); the agent sessions behind it are not published. Later changes
+(October 2026: install path, npx guard, dependency floor, this README) carry
+a `Co-Authored-By: Claude …` trailer in the commit history. Proofspec reuses the
+verifiers and receipts of my package
+[postcondition-mcp](https://github.com/christian140903-sudo/postcondition-mcp);
+the background is in [ORIGINS.md](docs/ORIGINS.md).
+
+## Status
+
+`0.1.0` · GitHub release (2026-07-17), not on npm · experimental · single
+maintainer · no known external users · last verified 2026-10-08.
+
+The configuration schema is an early public version; migrations will be
+documented before incompatible changes. Changes since 0.1.0 are listed under
+“Unreleased” in the [changelog](CHANGELOG.md). Please report security issues
+through the private process in [SECURITY.md](SECURITY.md).
+
+## License
+
+[MIT](LICENSE) © 2026 Christian Bucher
