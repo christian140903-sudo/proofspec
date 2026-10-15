@@ -6,24 +6,5 @@
     "url": "https://github.com/christian140903-sudo/proofspec",
     "source": "github"
   },
-  "version": "0.1.0",
-  "packages": [
-    {
-      "registryType": "npm",
-      "identifier": "proofspec",
-      "version": "0.1.0",
-      "transport": { "type": "stdio" },
-      "runtimeHint": "npx",
-      "runtimeArguments": ["-y"],
-      "packageArguments": ["serve"],
-      "environmentVariables": [
-        {
-          "name": "PROOFSPEC_CONFIG",
-          "description": "Optional path to the default proofspec.json file.",
-          "isRequired": false,
-          "isSecret": false
-        }
-      ]
-    }
-  ]
+  "version": "0.1.0"
 }

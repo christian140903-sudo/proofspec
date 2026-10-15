@@ -35,7 +35,7 @@
       "severity": "error",
       "policy": { "mode": "all" },
       "evidence": [
-        { "id": "cli", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## Quick start" } } },
+        { "id": "cli", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## Try it in two minutes" } } },
         { "id": "sdk", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## TypeScript API" } } },
         { "id": "mcp", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## MCP server" } } },
         { "id": "reports", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "## Reports" } } },
@@ -56,6 +56,19 @@
       ],
       "limitations": ["Documentation is paired with tests and source review; this check alone does not prove absence of every implementation bug."],
       "tags": ["security"]
+    },
+    {
+      "id": "install-path-guarded",
+      "statement": "The README warns that the npm package named proofspec is unrelated and runs the local binary only with --no-install.",
+      "severity": "error",
+      "policy": { "mode": "all" },
+      "dependsOn": ["documented-surfaces"],
+      "evidence": [
+        { "id": "foreign-name-warning", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "The npm package named `proofspec` is not this project." } } },
+        { "id": "guarded-ci-command", "verifier": { "kind": "file", "path": "README.md", "check": { "op": "contains", "text": "npx --no-install proofspec check proofspec.json" } } }
+      ],
+      "limitations": ["Text presence does not prove that no other example uses plain npx; test/install-docs.test.ts scans every fenced Markdown code block and server.json for that."],
+      "tags": ["documentation", "supply-chain"]
     },
     {
       "id": "example-available",
